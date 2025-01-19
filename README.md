@@ -67,5 +67,5 @@
 - Hud Text:
    - A hud static text to show the Current Simon. (Soon to show the current guardians and prisoners).
 
-Guardians:
+- Guardians:
    - All guardians can use !guns command and select their guns. They can also save them by checking the Save Weapons option.
