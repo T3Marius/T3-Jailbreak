@@ -57,4 +57,3 @@
    - Sadly, you can't put a prisoner model from config. You need to install PlayerModelChanger and set it as default.
    - Prisoner can use !heal command twice a round and if simon accepts he will get an healthshot.
    - Rebel: When a prisoner shoots or hurt a ct he becomes rebel and turns red announcing everyone in chat.
-   - 
