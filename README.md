@@ -69,3 +69,7 @@
 
 - Guardians:
    - All guardians can use !guns command and select their guns. They can also save them by checking the Save Weapons option.
+
+
+Cuffs video:
+https://imgur.com/xTcGsRv
