@@ -23,7 +23,7 @@
    
 - Special Days:
    - Current Special Days:
-  ```md
+   ```md
    1. OneInTheChamber
    2. Teleport
    3. WarDay
@@ -31,7 +31,7 @@
    5. HideNSeek
    6. NoScope
    7. ArmsRace
-   8. FreeForAll
+   8. FreeForAll (all players have acces to !guns command).
    9. Zombie (not finished yet.)
    ```
   - Special Days can be enabled/disabled from config.
@@ -41,7 +41,7 @@
 
 - Last Request:
   - Current Last Requests:
-   ```md
+  ```md
    1. KnifeFight (5 types)
    2. ShotForShot
    3. MagForMag
@@ -57,3 +57,15 @@
    - Sadly, you can't put a prisoner model from config. You need to install PlayerModelChanger and set it as default.
    - Prisoner can use !heal command twice a round and if simon accepts he will get an healthshot.
    - Rebel: When a prisoner shoots or hurt a ct he becomes rebel and turns red announcing everyone in chat.
+   - If the rebel gives up and Simon forgives him , his weapons will be stripped.
+
+- Queue Sistem:
+   - Prisoners can join the queue using !queue command if the ct team is full>
+   - You can set a special permission for queue system in config and that one will always be in fron of the queue.
+   - When a ct place is free, the first prisoner in queue will be moved to CT on round end.
+
+- Hud Text:
+   - A hud static text to show the Current Simon. (Soon to show the current guardians and prisoners).
+
+Guardians:
+   - All guardians can use !guns command and select their guns. They can also save them by checking the Save Weapons option.
