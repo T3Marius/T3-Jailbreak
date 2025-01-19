@@ -23,7 +23,7 @@
    
 - Special Days:
    - Current Special Days:
-        ```md
+  ```md
    1. OneInTheChamber
    2. Teleport
    3. WarDay
@@ -41,7 +41,7 @@
 
 - Last Request:
   - Current Last Requests:
-       ```md
+   ```md
    1. KnifeFight (5 types)
    2. ShotForShot
    3. MagForMag
