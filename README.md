@@ -1,71 +1,301 @@
 # T3-Jailbreak
 
-# Features:
-- Simon Sistem:
-   - Simon Menu: (!smenu).
-   - Simon Model: Simon can have a specail model which you can set it from config. 
-   - Open: Simon can open cells using !o command and closing them using !c command.
-   - Laser: Simon can use laser holding E and can change the laser color from !smenu (it remains saved foreach player).
-   - Marker: Simon can create a marker(circle) using ping and can change the marker color from !smenu(it remains saved foreach player).
-   - Freeday: Simon can give freeday using !freeday <name> or using the !smenu.
-   - Forgive: Simon can forgive a rebel using !pardon <name> command or the rebel can use !p and a menu will pop up on simon screen asking him if he wants to forgive him.
-   - Cuffs: Simon can put someone on cuffs using his special taser. While the prisoner is in cuffs Simon can move him wherever he wants holding right click at him.
-   - Prisoner Color: Simon can color prisoners using !color <playername> <color> or using the !smenu (which is more easier.) NOTE: You can use all the colors.
-   - Box: Simon can use the !box command allowing prisoners to hurt eachother. The box needs to be stopped using !box again.
-   - Extend: Simon can extend round by X minutes using !extend command. This will open a menu with minutes to be extended.
+A comprehensive CS2 Jailbreak plugin built with CounterStrikeSharp.
 
-- Deputy Sistem:
-   - Simon can have a deputy when one of the guards uses !d or !deputy. 
-   - Deputy Model: Deputy can have a special model too if you add it from config.
-   - Deputy can use !box , !open and !color commands so he can be helpful to Simon.
-   - A Deputy can give up on his role using !ud.
-   - If the Simon dies and there is a Deputy, the deputy immediatly becomes the new Simon.
-   
-- Special Days:
-   - Current Special Days:
-   ```md
-   1. OneInTheChamber
-   2. Teleport
-   3. WarDay
-   4. DrunkDay
-   5. HideNSeek
-   6. NoScope
-   7. ArmsRace
-   8. FreeForAll (all players have acces to !guns command).
-   9. Zombie (not finished yet.)
-   ```
-  - Special Days can be enabled/disabled from config.
-  - The only persons who can set a special day are Admins and Simon.
-  - Each special day has a countdown before it starts so players can run.
-  - Special Day can be setted each 3 rounds. It has a 3 rounds cooldown by default but you can set it from config.
+## 🎮 Core Features
 
-- Last Request:
-  - Current Last Requests:
-  ```md
-   1. KnifeFight (5 types)
-   2. ShotForShot
-   3. MagForMag
-   4. Rebel (can be used if there are more than 2 ct.)
-   5. OnlyHeadshot
-   6. NoScope
-   7. Dodgeball
-   ```
-  - The last request wins are saved to the database and player can see the tops using !lrtop or !toplr.
-  - On the last request the last prisoner can speak.
- 
-- Prisoner:
-   - Sadly, you can't put a prisoner model from config. You need to install PlayerModelChanger and set it as default.
-   - Prisoner can use !heal command twice a round and if simon accepts he will get an healthshot.
-   - Rebel: When a prisoner shoots or hurt a ct he becomes rebel and turns red announcing everyone in chat.
-   - If the rebel gives up and Simon forgives him , his weapons will be stripped.
+### Roles
 
-- Queue Sistem:
-   - Prisoners can join the queue using !queue command if the ct team is full>
-   - You can set a special permission for queue system in config and that one will always be in fron of the queue.
-   - When a ct place is free, the first prisoner in queue will be moved to CT on round end.
+#### 👮 Simon (Guard Leader)
+- **Commands**:
+  - `!s` - Become Simon
+  - `!unsimon` - Resign from Simon
+  - `!o / !c` - Control cell doors
+  - `!color <player> <color>` - Color a player.
+  - `!rebel <player>` - Mark as rebel
+  - `!freeday <player>` - Grant freeday
+  - `!box` - Starts box between prisoners (!box again to stop it.)
+  - Simon can also cuffs a player with his tazer and move him while looking at him and holding RightClick.
+  - Simon also can choose his Laser/Marker color from !smenu.
 
-- Hud Text:
-   - A hud static text to show the Current Simon. (Soon to show the current guardians and prisoners).
+#### 🚔 Deputy
+- **Commands**:
+  - `!deputy` - Become deputy
+  - `!undeputy` - Resign from deputy
+  - Limited Simon permissions
 
-- Guardians:
-   - All guardians can use !guns command and select their guns. They can also save them by checking the Save Weapons option.
+### 🎯 Last Request System
+
+Available LR:
+- Knife Fight
+- Shot for Shot
+- Rebel
+- Dodgeball
+- Headshot Only
+- Mag4Mag
+- No Scope
+
+### 🎉 Special Days
+
+1. **One In The Chamber**
+   - One bullet kills
+   - Get ammo on kills
+
+2. **No Scope Day**
+   - Snipers only
+   - No scoping allowed
+
+3. **Hide And Seek**
+   - Ts hide
+   - CTs seek
+
+4. **Teleport Day**
+   - Random teleports
+   - Survival game
+
+5. **Arms Race**
+   - Progressive weapons
+   - Kill to advance
+
+6. **Drunk Day**
+   - Altered movement
+   - Random effects
+
+7. **War Day**
+   - Team battle
+   - Full loadout
+
+## ⌨️ Commands
+
+### Admin Commands
+```css
+!admin             - Open admin menu
+!setsimon <player> - Force set Simon
+!removesimon       - Remove current Simon
+!sd                - Start special day
+!setdeputy <player> - Force set Deputy
+!removeddeputy     - Remove current Deputy
+!lrtop             - Show top LR players
+```
+
+### HUD Messages
+- Displays current Simon
+
+### Tags
+- Simon: [SIMON]
+- Deputy: [DEPUTY]
+
+### Config
+```json
+{
+  "Database": {
+    "DatabaseHost": "",
+    "DatabaseName": "",
+    "DatabaseUser": "",
+    "DatabasePassword": "",
+    "DatabasePort": 3306
+  },
+  "Simon": {
+    "SetSimonIfNotAny": 10.0 // cooldown of choosing a new simon
+  },
+  "Models": {
+    "SimonModel": "",
+    "DeputyModel": "",
+    "GuardModel": "",
+    "ArmsRaceKnifeModel": ""
+  },
+  "LastRequest": {
+    "EnableCheatPunishment": true, // right now this is usless since you can only damage with the gun from LR.
+    "LrStartTimer": 5.0,
+    "Types": {     // you can enable/disable any last requests from here.
+      "KnifeFight": true,
+      "ShotForShot": true,
+      "NoScope": true,
+      "MagForMag": true,
+      "Dodgeball": true,
+      "HeadShotOnly": true,
+      "Rebel": true
+    }
+  },
+
+  "SpecialDays": {
+    "SDRoundsCountdown": 3,// how many rounds between special days
+    "SdStartTimer": 15.0, // basic special days timer
+    "HideTimer": 120.0, // timer for hide and seek day
+    "WarTimer": 60.0, // timer for war day
+    "ZombieTimer": 60.0, // timer for zombie(zombie disabled for now.)
+    "ZombieHealth": 3500, // Zombies health
+    "ZombieModel": "", // if you have a zombie model add it here.
+    "AdminPermissions": [ // permission to use the admin jail commands
+      "@css/generic"
+    ],
+    "Type": {     // you can enable/disable any specialday from here.
+      "FreeForAll": true,
+      "OneInTheChamber": true,
+      "NoScope": true,
+      "Teleport": true,
+      "ArmsRace": true,
+      "HideAndSeek": true,
+      "DrunkDay": true,
+      "WarDay": true
+    }
+  },
+  "Commands": {
+    "SimonMenu": [
+      "wmenu",
+      "smenu"
+    ],
+    "Simon": [
+      "s",
+      "simon"
+    ],
+    "UnSimon": [
+      "us",
+      "unsimon"
+    ],
+    "Deputy": [
+      "d",
+      "deputy"
+    ],
+    "UnDeputy": [
+      "ud",
+      "undeputy"
+    ],
+    "Box": [
+      "box"
+    ],
+    "Ding": [
+      "ding"
+    ],
+    "GunsMenu": [
+      "gun",
+      "guns"
+    ],
+    "OpenCells": [
+      "open",
+      "o"
+    ],
+    "CloseCells": [
+      "close",
+      "c"
+    ],
+    "ForgiveRebel": [
+      "forgive",
+      "pardon"
+    ],
+    "GiveUp": [
+      "giveup",
+      "p"
+    ],
+    "GiveFreeday": [
+      "givefreeday",
+      "freeday"
+    ],
+    "RemoveFreeday": [
+      "removefreeday",
+      "unfreeday"
+    ],
+    "LastRequest": [
+      "lr",
+      "lastrequest"
+    ],
+    "SpecialDays": [
+      "sd",
+      "specialday"
+    ],
+    "Heal": [
+      "h",
+      "heal"
+    ],
+    "SetColor": [
+      "color",
+      "setcolor"
+    ],
+    "LRTop": [
+      "lrtop",
+      "toplr"
+    ],
+    "QueueCommands": [
+      "q",
+      "queue"
+    ],
+    "QueueListCommands": [
+      "qlist",
+      "queuelist"
+    ],
+    "ExtendRoundTimeCommands": [
+      "extend"
+    ],
+    "CTBanCommands": [
+      "ctban"
+    ],
+    "AdminCommands": {
+      "SetSimon": [
+        "sw",
+        "ss",
+        "setsimon"
+      ],
+      "RemoveSimon": [
+        "removes",
+        "removesimon"
+      ],
+      "AdminPermissions": {
+        "SetSimon": [
+          "@css/generic"
+        ],
+        "RemoveSimon": [
+          "@css/generic"
+        ]
+      }
+    }
+  },
+  "BunnyHoop": {
+    "BunnyHoopTimer": 20, // after how many seconds enable BunnyHoop on round start
+    "PrintToCenterHtml": false, // print countdown to centerhtml
+    "ShowChatMessages": true // show the message when enabled to chat.
+  },
+  "Prisoniers": {
+    "SkipQueuePermissions": [ // automaticly in front of queue if have any of these flags
+      "@css/vip"
+    ],
+    "HealCommandCountPerRound": 2 // how many times prisoners can ask for heal.
+  },
+  "Guardians": { // if you are guardian and have vip you can get x healthshot (not made yet.)
+    "VipFlags": [
+      "@css/vip"
+    ],
+    "GiveXHealthshot": [
+      ""
+    ]
+  },
+  // add sounds here if you want.
+  "Sounds": {
+    "SetSimonSound": "",
+    "SimonDeathSound": "",
+    "SimonGaveUpSound": ""
+  },
+  "Version": 1
+}
+```
+
+## 🗺️ Roadmap
+
+### Upcoming Features
+1. **HUD Improvements**
+   - Add prisoner count display
+   - Add guardian count display
+   - Improved visibility and positioning
+
+2. **VIP Features**
+   - Implement healthshot system for CT VIP players
+   - Configurable through guardians settings
+
+3. **Special Days Enhancement**
+   - Complete Zombie Day implementation
+   - Add proper zombie models and mechanics
+   - Balance zombie health and abilities
+
+4. **Code Optimization**
+   - Code cleanup and restructuring
+   - Performance improvements
+   - Better documentation
