@@ -2,6 +2,14 @@
 
 A comprehensive CS2 Jailbreak plugin built with CounterStrikeSharp.
 
+## Install / Dependecies
+- T3Menu-API: **[** [**Download Here**](https://github.com/T3Marius/T3Menu-API/releases/tag/1.0.5) **]**
+- CounteStrikeSharp: **[** [**Download Here**](https://github.com/roflmuffin/CounterStrikeSharp) **]**
+
+# Upload
+- Drag&Drop addons folder in game/csgo.
+- You don't need to worry about the config file. It will automaticly update for any version without modifying your current settings.
+
 ## 🎮 Core Features
 
 ### Roles
@@ -80,6 +88,13 @@ Available LR:
 
 ### HUD Messages
 - Displays current Simon
+
+### Database:
+- In database it saves the players won/lost Last Requests which you can see in game with !lrtop.
+
+### Cookies
+- In cookies it saves player !guns settings so they can keep the same guns as CT.
+- It saves the laser/marker color of each simon too.
 
 ### Tags
 - Simon: [SIMON]
