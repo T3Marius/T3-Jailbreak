@@ -314,3 +314,6 @@ Available LR:
    - Code cleanup and restructuring
    - Performance improvements
    - Better documentation
+
+5. **Creating API**
+   - Creating api for the GetSimon, SetSimon, GetDeputy, SetDeputy, RemoveSimon, RemoveDeputy, etc.
