@@ -97,8 +97,8 @@ Available LR:
 - It saves the laser/marker color of each simon too.
 
 ### Tags
-- Simon: [SIMON]
-- Deputy: [DEPUTY]
+- Simon: ⭐ SIMON ⭐
+- Deputy: ⭐ DEPUTY ⭐
 
 ### Config
 ```json
