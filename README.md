@@ -317,3 +317,6 @@ Available LR:
 
 5. **Creating API**
    - Creating api for the GetSimon, SetSimon, GetDeputy, SetDeputy, RemoveSimon, RemoveDeputy, etc.
+
+### Credits
+- Many thanks to [@Destoer](https://github.com/destoer) Since i've inspired alot from his plugin and borrowed code from him.
