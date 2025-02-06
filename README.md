@@ -320,3 +320,4 @@ Available LR:
 
 ### Credits
 - Many thanks to [@Destoer](https://github.com/destoer) Since i've inspired alot from his plugin and borrowed code from him.
+- Credits to: [@Xaboo1337](https://github.com/xaboo1337) For giving me ideas and helping me from the beginning.
