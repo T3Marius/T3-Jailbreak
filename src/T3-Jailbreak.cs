@@ -14,6 +14,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API.Modules.Memory;
+using JailAPI;
 using System.Drawing;
 using CounterStrikeSharp.API.Modules.Timers;
 
@@ -25,7 +26,7 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
     // NOTA: ADAUGAT EVENT CHECK PT LR 
     public override string ModuleName => "[T3] Jailbreak";
     public override string ModuleAuthor => "T3Marius";
-    public override string ModuleVersion => "1.0";
+    public override string ModuleVersion => "1.1";
     public static T3Jailbreak Instance { get; set; } = new T3Jailbreak();
     public PluginConfig Config { get; set; } = new PluginConfig();
 
@@ -33,6 +34,10 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
     private bool isCountdownActive = false;
     private DateTime lastUpdateTime;
     private readonly WIN_LINUX<int> OnCollisionRulesChangedOffset = new WIN_LINUX<int>(173, 172);
+    public IJailAPI? JailApi { get; set; }
+    public static JailAPI jailApi { get; set; } = new JailAPI();
+
+    public static PluginCapability<IJailAPI> Capability { get; } = new("jailcore:core");
 
     Circle marker = new Circle();
     static bool isEventActive = false;
@@ -60,6 +65,9 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
     public override void Load(bool hotReload)
     {
         Instance = this;
+
+
+        Capabilities.RegisterPluginCapability(IJailAPI.PluginCapabilty, () => JailApi);
         RegisterEventsAndListeners();
         AddTimer(Laser.LASER_TIME, laser.LaserTick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
 
@@ -282,7 +290,7 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
         if (shooter == null)
             return HookResult.Continue;
 
-        if (!Simon.isSimon(shooter))
+        if (!jailApi.IsSimon(shooter))
             return HookResult.Continue;
 
         var impactPosition = new CounterStrikeSharp.API.Modules.Utils.Vector(@event.X, @event.Y, @event.Z);
@@ -321,10 +329,10 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
     {
         CCSPlayerController? player = @event.Userid;
 
-        if (Simon.isSimon(player))
+        if (jailApi.IsSimon(player))
         {
             Server.PrintToChatAll(Localizer["jb.prefix"] + Localizer["simon.disconnected"]);
-            Simon.RemoveSimon();
+            jailApi.RemoveSimon();
         }
 
         return HookResult.Continue;
@@ -417,21 +425,32 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
         }
 
         var TPlayers = Utilities.GetPlayers().Where(p => p.Team == CsTeam.Terrorist && !p.IsBot && !p.IsHLTV);
-        Server.PrintToChatAll(Localizer["jb.prefix"] + Localizer["t.muted"]);
-        AddTimer(0.5f, () =>
+
+        if (Config.Prisoniers.MuteXSecondsOnRoundStart > 0)
         {
+            Server.PrintToChatAll(Localizer["jb.prefix"] + Localizer["t.muted", Config.Prisoniers.MuteXSecondsOnRoundStart]);
+
             foreach (var p in TPlayers)
             {
-                if (AdminManager.PlayerHasPermissions(p, "@css/generic"))
+                foreach (var flag in Config.Prisoniers.SkipFlagForMute)
+                {
+                    if (AdminManager.PlayerHasPermissions(p, flag))
+                    {
+                        p.VoiceFlags = VoiceFlags.Normal;
+                    }
+                    else
+                    {
+                        p.VoiceFlags = VoiceFlags.Muted;
+                    }
+                }
+
+                AddTimer(Config.Prisoniers.MuteXSecondsOnRoundStart, () =>
                 {
                     p.VoiceFlags = VoiceFlags.Normal;
-                }
-                else
-                {
-                    p.VoiceFlags = VoiceFlags.Muted;
-                }
+                    Server.PrintToChatAll(Localizer["jb.prefix"] + Localizer["t.can.talk"]);
+                }, TimerFlags.STOP_ON_MAPCHANGE);
             }
-        });
+        }
         foreach (var player in Utilities.GetPlayers())
         {
             if (player == null || player.Team == CsTeam.Terrorist || player.Team == CsTeam.Spectator)

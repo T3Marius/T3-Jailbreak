@@ -39,6 +39,7 @@ class Line
 
 class Circle
 {
+    private static JailAPI jailApi { get; set; } = new JailAPI();
     private static readonly Dictionary<int, Color> SavedMarkerColors = new();
 
     public Circle()
@@ -71,7 +72,7 @@ class Circle
     {
         Vector mid = new Vector(X, Y, Z);
         float step = (float)(2.0f * Math.PI) / lines.Length;
-        var simon = Simon.GetSimon();
+        var simon = jailApi.GetSimon();
         if (simon == null)
             return;
 

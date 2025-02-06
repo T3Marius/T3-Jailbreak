@@ -14,6 +14,7 @@ namespace T3Jailbreak;
 
 public static class Commands
 {
+    public static JailAPI jailApi { get; set; } = new JailAPI();
     public static bool isBoxActive = false;
     private static readonly Dictionary<ulong, int> HealUsageTracker = new();
     private static int MaxHealUsagePerRound = Instance.Config.Prisoniers.HealCommandCountPerRound;
@@ -113,7 +114,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (!(Simon.isSimon(player) || Simon.isDeputy(player) || AdminManager.PlayerHasPermissions(player, "@css/generic")))
+        if (!(jailApi.IsSimon(player) || jailApi.IsDeputy(player) || AdminManager.PlayerHasPermissions(player, "@css/generic")))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["no.permission"]);
             return;
@@ -158,7 +159,7 @@ public static class Commands
                 {
                     Server.NextFrame(() =>
                     {
-                        lrTopMenu.AddTextOption(Instance.Localizer["no.top.players"]);
+                        lrTopMenu.AddTextOption(Instance.Localizer["no.top.players"], selectable: false);
                         manager.OpenMainMenu(player, lrTopMenu);
                     });
                     return;
@@ -171,7 +172,7 @@ public static class Commands
                     foreach (var (PlayerName, Wins) in topPlayers)
                     {
                         string displayText = $"<font color='#FFFF00'>#{rank}.</font> {PlayerName} - <font color='#FFE4C4'>{Wins}</font> Wins";
-                        lrTopMenu.AddTextOption(displayText);
+                        lrTopMenu.AddTextOption(displayText, selectable: true);
                         rank++;
                     }
                     manager.OpenMainMenu(player, lrTopMenu);
@@ -186,7 +187,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (!Simon.isSimon(player) && !Simon.isDeputy(player))
+        if (!jailApi.IsSimon(player) && !jailApi.IsDeputy(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon.using.command"]);
             return;
@@ -232,7 +233,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (!Simon.isSimon(player))
+        if (!jailApi.IsSimon(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon.using.command"]);
             return;
@@ -385,6 +386,52 @@ public static class Commands
             }
             manager.OpenSubMenu(p, prisoniersSubMenu);
         });
+        mainMenu.Add(Instance.Localizer["option<cells>"], (p, option) =>
+        {
+            var cellsSubMenu = manager.CreateMenu(Instance.Localizer["submenu<cells>"], isSubMenu: true);
+            cellsSubMenu.ParentMenu = mainMenu;
+
+            cellsSubMenu.Add(Instance.Localizer["option<opencells>"], (p, option) =>
+            {
+                ForceOpen();
+            });
+            cellsSubMenu.Add(Instance.Localizer["option<closecells>"], (p, option) =>
+            {
+                ForceClose();
+            });
+            manager.OpenSubMenu(player, cellsSubMenu);
+        });
+        mainMenu.Add(Instance.Localizer["option<box>"], (p, option) =>
+        {
+            var boxSubMenu = manager.CreateMenu(Instance.Localizer["submenu<box>"], isSubMenu: true);
+            boxSubMenu.ParentMenu = mainMenu;
+
+            boxSubMenu.AddBoolOption(Instance.Localizer["option<togglebox>"], defaultValue: false, (p, option) =>
+            {
+                if (option is IT3Option boolOption)
+                {
+                    bool boxEnabled = boolOption.OptionDisplay!.Contains("✔");
+
+                    if (boxEnabled)
+                    {
+                        ConVar.Find("mp_teammates_are_enemies")!.GetPrimitiveValue<bool>() = true;
+                        Server.ExecuteCommand("sv_teamid_overhead 0");
+
+                        Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["box.started"]);
+                        Utilities.GetPlayers().ForEach(p => p.PlaySound(Instance.Config.Sounds.BoxSound));
+                    }
+                    else
+                    {
+                        ConVar.Find("mp_teammates_are_enemies")!.GetPrimitiveValue<bool>() = false;
+                        Server.ExecuteCommand("sv_teamid_overhead 1");
+
+                        Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["box.ended"]);
+                    }
+                }
+            });
+            manager.OpenSubMenu(player, boxSubMenu);
+
+        });
         mainMenu.Add(Instance.Localizer["option<setplayercolor>"], (p, option) =>
         {
             var prisoniersSubMenu = manager.CreateMenu(Instance.Localizer["lr<selectplayer>"], isSubMenu: true);
@@ -457,15 +504,15 @@ public static class Commands
             return;
         }
 
-        var currentSimon = Simon.GetSimon();
+        var currentSimon = jailApi.GetSimon();
         if (currentSimon == null)
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["no.simon.remove"]);
             return;
         }
 
-        Simon.RemoveSimon();
-        Server.PrintToChatAll(string.Format(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.removed.admin"], player.PlayerName));
+        jailApi.RemoveSimon();
+        Server.PrintToChatAll(string.Format(Instance.Localizer["jb.prefix"] + Instance.Localizer["jailApi.removed.admin"], player.PlayerName));
     }
 
     [CommandHelper(minArgs: 1, usage: "<playername> (ONLY CT)")]
@@ -512,14 +559,14 @@ public static class Commands
             return;
         }
 
-        var currentSimon = Simon.GetSimon();
-        if (currentSimon != null && Simon.isSimon(currentSimon))
+        var currentSimon = jailApi.GetSimon();
+        if (currentSimon != null && jailApi.IsSimon(currentSimon))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.exists"]);
             return;
         }
 
-        Simon.SetSimon(targetPlayer.Slot);
+        jailApi.SetSimon(targetPlayer.Slot);
         Server.PrintToChatAll(string.Format(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.setted.admin"], player.PlayerName, targetPlayer.PlayerName));
     }
     public static void Command_GiveUP(CCSPlayerController? player, CommandInfo info)
@@ -532,7 +579,7 @@ public static class Commands
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["need.to.be.t"]);
             return;
         }
-        var simon = Simon.GetSimon();
+        var simon = jailApi.GetSimon();
         if (simon == null)
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["no.simon.forgivness"]);
@@ -591,7 +638,7 @@ public static class Commands
             return;
         }
 
-        var simon = Simon.GetSimon();
+        var simon = jailApi.GetSimon();
         if (simon == null)
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["no.simon"]);
@@ -629,7 +676,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (!Simon.isSimon(player) && !Simon.isDeputy(player))
+        if (!jailApi.IsSimon(player) && !jailApi.IsDeputy(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon.or.deputy.using.command"]);
             return;
@@ -659,7 +706,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (!Simon.isSimon(player) && !Simon.isDeputy(player))
+        if (!jailApi.IsSimon(player) && !jailApi.IsDeputy(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon.using.command"]);
             return;
@@ -688,7 +735,7 @@ public static class Commands
     {
         if (player == null)
             return;
-        if (!Simon.isSimon(player))
+        if (!jailApi.IsSimon(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon.using.command"]);
             return;
@@ -714,7 +761,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (Simon.isSimon(player))
+        if (jailApi.IsSimon(player))
         {
             Utilities.GetPlayers().ForEach(p => p.PlaySound("sounds/jailbreak_sounds/40_volume/boxsound.vsnd_c"));
         }
@@ -728,7 +775,7 @@ public static class Commands
         if (player == null)
             return;
 
-        if (Simon.isSimon(player))
+        if (jailApi.IsSimon(player))
         {
             isBoxActive = !isBoxActive;
 
@@ -739,7 +786,7 @@ public static class Commands
                 Server.ExecuteCommand("sv_teamid_overhead 0");
 
                 Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["box.started"]);
-                Utilities.GetPlayers().ForEach(p => p.PlaySound("sounds/jailbreak_sounds/40_volume/boxsound.vsnd_c"));
+                Utilities.GetPlayers().ForEach(p => p.PlaySound(Instance.Config.Sounds.BoxSound));
             }
             else
             {
@@ -759,18 +806,16 @@ public static class Commands
     {
         if (player == null)
             return;
-        if (!Simon.isSimon(player)) 
+        if (!jailApi.IsSimon(player)) 
             return;
-        Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["cells.opened"]);
         ForceOpen();
     }
     public static void Command_CloseCells(CCSPlayerController? player, CommandInfo info)
     {
         if (player == null)
             return;
-        if (!Simon.isSimon(player))
+        if (!jailApi.IsSimon(player))
             return;
-        Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["cells.closed"]);
         ForceClose();
     }
     public static void Command_Guns(CCSPlayerController? player, CommandInfo info)
@@ -871,8 +916,8 @@ public static class Commands
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.not.allowed"]);
             return;
         }
-        var simon = Simon.GetSimon();
-        if (Simon.isSimon(simon))
+        var simon = jailApi.GetSimon();
+        if (jailApi.IsSimon(simon))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.exists"]);
             return;
@@ -880,7 +925,7 @@ public static class Commands
         if (player != null && player.Team == CsTeam.CounterTerrorist)
         {
             Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.selected", player.PlayerName]);
-            Simon.SetSimon(player.Slot);
+            jailApi.SetSimon(player.Slot);
         }
     }
     public static void Command_UnSimon(CCSPlayerController? player, CommandInfo info)
@@ -891,23 +936,23 @@ public static class Commands
         if (player.Team == CsTeam.Terrorist || player.Team == CsTeam.Spectator)
             return;
 
-        if (!Simon.isSimon(player))
+        if (!jailApi.IsSimon(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.simon"]);
             return;
         }
         Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.gaveup", player.PlayerName]);
-        Simon.RemoveSimon();
+        jailApi.RemoveSimon();
 
-        Simon.RemoveSimonInterval();
-        Simon.RemoveDeputy();
+        jailApi.RemoveSimonInterval();
+        jailApi.RemoveDeputy();
 
-        var currentSimon = Simon.GetSimon();
+        var currentSimon = jailApi.GetSimon();
 
         Instance.AddTimer(Instance.Config.Simon.SetSimonIfNotAny, () =>
         {
             // Check if there is already an existing Simon
-            if (Simon.isSimon(currentSimon))
+            if (jailApi.IsSimon(currentSimon))
                 return;
 
             var cts = Utilities.GetPlayers().Where(p => p.Team == CsTeam.CounterTerrorist && p.IsValid && p.PawnIsAlive).ToList();
@@ -919,7 +964,7 @@ public static class Commands
                 if (newSimon.IsValid && newSimon.PawnIsAlive)
                 {
                     Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.selected", newSimon.PlayerName]);
-                    Simon.SetSimon(newSimon.Slot);
+                    jailApi.SetSimon(newSimon.Slot);
                 }
             }
         });
@@ -936,19 +981,19 @@ public static class Commands
             return;
         }
 
-        if (Simon.GetSimon() == null)
+        if (jailApi.GetSimon() == null)
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.required"]);
             return;
         }
 
-        if (Simon.isSimon(player))
+        if (jailApi.IsSimon(player))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.cant.deputy"]);
             return;
         }
-        var deputy = Simon.GetDeputy();
-        if (Simon.isDeputy(deputy))
+        var deputy = jailApi.GetDeputy();
+        if (jailApi.IsDeputy(deputy))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["deputy.exists"]);
             return;
@@ -956,7 +1001,7 @@ public static class Commands
 
         if (player.Team == CsTeam.CounterTerrorist)
         {
-            Simon.SetDeputy(player.Slot);
+            jailApi.SetDeputy(player.Slot);
             Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["deputy.selected", player.PlayerName]);
         }
     }
@@ -967,14 +1012,14 @@ public static class Commands
 
         if (player.Team == CsTeam.Terrorist || player.Team == CsTeam.Spectator)
             return;
-        var deputy = Simon.GetDeputy();
-        if (!Simon.isDeputy(deputy))
+        var deputy = jailApi.GetDeputy();
+        if (!jailApi.IsDeputy(deputy))
         {
             info.ReplyToCommand(Instance.Localizer["jb.prefix"] + Instance.Localizer["not.deputy"]);
             return;
         }
         Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["deputy.gaveup", player.PlayerName]);
-        Simon.RemoveDeputy();
+        jailApi.RemoveDeputy();
     }
     public static HookResult OnTakeDamage(DynamicHook hook)
     {

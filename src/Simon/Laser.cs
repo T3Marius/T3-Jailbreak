@@ -21,7 +21,7 @@ public class Laser
 
     public void Ping(CCSPlayerController? player, float x, float y, float z)
     {
-        if (player != null && isSimon(player) && player.PawnIsAlive)
+        if (player != null && Instance.JailApi!.IsSimon(player) && player.PawnIsAlive)
         {
             RemoveMarker();
 

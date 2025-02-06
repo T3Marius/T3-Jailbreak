@@ -4,7 +4,6 @@ using System.Drawing;
 using static T3Jailbreak.Helpers;
 using CounterStrikeSharp.API.Modules.Utils;
 using static T3Jailbreak.T3Jailbreak;
-using CounterStrikeSharp.API.Modules.Timers;
 using Microsoft.Extensions.Logging;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
@@ -13,6 +12,7 @@ namespace T3Jailbreak;
 
 public partial class Simon
 {
+    public static JailAPI jailApi { get; set; } = new JailAPI();
     public static readonly Dictionary<string, CPointWorldText> SimonHudTexts = new();
     public static readonly Dictionary<string, CPointWorldText> SimonHudStaticTexts = new();
     public static readonly Dictionary<string, bool> FrozenPrisoners = new();
@@ -35,7 +35,7 @@ public partial class Simon
     }
     public static HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
     {
-        foreach (var p in Utilities.GetPlayers().Where(p => isSimon(p)))
+        foreach (var p in Utilities.GetPlayers().Where(p => jailApi.IsSimon(p)))
         {
             p.SetTag(" ");
         }
@@ -48,7 +48,7 @@ public partial class Simon
         if (simon == null)
             return HookResult.Continue;
 
-        if (!isSimon(simon))
+        if (!jailApi.IsSimon(simon))
             return HookResult.Continue;
 
         var activeWeapon = simon.PlayerPawn.Value?.WeaponServices?.ActiveWeapon.Value;
@@ -64,7 +64,7 @@ public partial class Simon
     }
     public static void OnTick()
     {
-        foreach (var simon in Utilities.GetPlayers().Where(p => isSimon(p) && p.IsValid && p.PawnIsAlive))
+        foreach (var simon in Utilities.GetPlayers().Where(p => jailApi.IsSimon(p) && p.IsValid && p.PawnIsAlive))
         {
             string simonSteamId = simon.SteamID.ToString();
 
@@ -76,7 +76,6 @@ public partial class Simon
 
                     if (prisoner != null)
                     {
-                        // Start moving prisoner
                         HeldPrisoners[simonSteamId] = prisoner;
                     }
                 }
@@ -127,7 +126,7 @@ public partial class Simon
             attacker = playerWhoAttacked.Controller.Value?.As<CCSPlayerController>();
         }
 
-        if (!isSimon(attacker))
+        if (!jailApi.IsSimon(attacker))
             return HookResult.Continue;
 
         if (info.BitsDamageType != DamageTypes_t.DMG_SHOCK)
@@ -168,9 +167,9 @@ public partial class Simon
         if (prisoniers.Count == 1)
             return HookResult.Continue;
 
-        if (Simon.isSimon(player))
+        if (jailApi.IsSimon(player))
         {
-            var deputy = Simon.GetDeputy();
+            var deputy = jailApi.GetDeputy();
             if (deputy != null && deputy.IsValid && deputy.PawnIsAlive)
             {
                 foreach (var p in Utilities.GetPlayers())
@@ -181,7 +180,7 @@ public partial class Simon
                     }
                 }
                 Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.death.deputy.selected", deputy.PlayerName]);
-                Simon.SetSimon(deputy.Slot);
+                jailApi.SetSimon(deputy.Slot);
             }
             else
             {
@@ -191,21 +190,21 @@ public partial class Simon
                     Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.death", attacker.PlayerName]);
                     foreach (var p in Utilities.GetPlayers())
                     {
-                        p.PlaySound("sounds/jailbreaksounds/unsimon.vsnd_c");
+                        p.PlaySound(Instance.Config.Sounds.SimonDeathSound);
                     }
 
                     var newSimon = cts[new Random().Next(cts.Count)];
 
-                    Instance.AddTimer(5.0f, () =>
+                    Instance.AddTimer(Instance.Config.Simon.SetSimonIfNotAny, () =>
                     {
-                        var simon = Simon.GetSimon();
-                        if (Simon.isSimon(simon))
+                        var simon = jailApi.GetSimon();
+                        if (jailApi.IsSimon(simon))
                             return;
 
                         if (newSimon.IsValid && newSimon.PawnIsAlive)
                         {
                             Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.death.selected", newSimon.PlayerName]);
-                            Simon.SetSimon(newSimon.Slot);
+                            jailApi.SetSimon(newSimon.Slot);
                         }
                     });
                 }
@@ -217,8 +216,8 @@ public partial class Simon
 
     public static HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        RemoveSimonInterval();
-        RemoveDeputy();
+        jailApi.RemoveSimonInterval();
+        jailApi.RemoveDeputy();
         foreach (var ct in Utilities.GetPlayers().Where(p => p.Team == CsTeam.CounterTerrorist))
         {
             if (!SpecialDays.isSpecialDayActive)
@@ -238,202 +237,22 @@ public partial class Simon
 
         Instance.AddTimer(Instance.Config.Simon.SetSimonIfNotAny, () =>
         {
-            var currentSimon = GetSimon();
-            if (!isSimon(currentSimon))
+            var currentSimon = jailApi.GetSimon();
+            if (!jailApi.IsSimon(currentSimon))
             {
                 var cts = Utilities.GetPlayers().Where(p => p.Team == CsTeam.CounterTerrorist && p.IsValid && p.PawnIsAlive).ToList();
                 if (cts.Count > 0)
                 {
                     var newSimon = cts[new Random().Next(cts.Count)];
                     Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["simon.selected", newSimon.PlayerName]);
-                    SetSimon(newSimon.Slot);
+                    jailApi.SetSimon(newSimon.Slot);
                 }
             }
         });
 
         return HookResult.Continue;
     }
-   /* public static HookResult OnPlayerHurt(EventPlayerHurt @event, GameEventInfo info)
-    {
-        var prisoner = @event.Userid;
-        var simon = @event.Attacker;
 
-        if (prisoner == null)
-            return HookResult.Continue;
-        if (simon == null)
-            return HookResult.Continue;
-        if (!isSimon(simon))
-            return HookResult.Continue;
-
-        var weapon = simon.FindWeapon("taser");
-
-        if (weapon != null && weapon.DesignerName.Contains("taser", StringComparison.OrdinalIgnoreCase))
-        {
-            var jailPlayer = JailPlayerFromPlayer(prisoner);
-            if (jailPlayer == null)
-                return HookResult.Continue;
-
-            if (!jailPlayer.IsCuffed)
-            {
-                jailPlayer.IsCuffed = true;
-                prisoner.Freeze();
-                Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["prisonier.cuffed", simon.PlayerName, prisoner.PlayerName]);
-            }
-            else
-            {
-                jailPlayer.IsCuffed = false;
-                prisoner.UnFreeze();
-                Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["prisonier.uncuffed", simon.PlayerName, prisoner.PlayerName]);
-            }
-        }
-
-        return HookResult.Continue;
-    }
-   */
-
-    public static void SetSimon(int slot)
-    {
-        if (SpecialDays.isSpecialDayActive)
-            return;
-        if (SpecialDays.isHnsCountDownActive || SpecialDays.isWarCountDownActive || SpecialDays.isCountdownActive)
-            return;
-
-        simonSlot = slot;
-        var player = Utilities.GetPlayerFromSlot(simonSlot);
-        if (player == null || !player.IsValid)
-        {
-            simonSlot = INVALID_SLOT;
-            return;
-        }
-        if (player.IsBot || player.IsHLTV)
-            return;
-
-        if (!string.IsNullOrEmpty(Instance.Config.Models.SimonModel))
-        {
-            player.SetModel(Instance.Config.Models.SimonModel);
-        }
-        foreach (var p in Utilities.GetPlayers())
-        {
-            if (string.IsNullOrEmpty(Instance.Config.Sounds.SetSimonSound))
-            {
-                p.PlaySound(Instance.Config.Sounds.SetSimonSound);
-            }
-        }
-        player.GiveWeapon("taser");
-        player.SetTag(Instance.Localizer["simon.tag"]);
-        player.SetColor(Color.Blue);
-        UpdateSimonHud();
-    }
-    public static CCSPlayerController? GetDeputy()
-    {
-        if (deputySlot == INVALID_SLOT)
-        {
-            return null;
-        }
-
-        return Utilities.GetPlayerFromSlot(deputySlot);
-    }
-
-    public static void RemoveSimonInterval()
-    {
-        simonSlot = INVALID_SLOT;
-        simonTimestamp = -1;
-    }
-
-    public static void RemoveSimon()
-    {
-        var player = Utilities.GetPlayerFromSlot(simonSlot);
-
-        if (player != null && player.IsValid && player.PawnIsAlive)
-        {
-            player.SetColor(DefaultColor);
-            foreach (var p in Utilities.GetPlayers())
-            {
-                if (string.IsNullOrEmpty(Instance.Config.Sounds.SimonGaveUpSound))
-                {
-                    p.PlaySound(Instance.Config.Sounds.SimonGaveUpSound);
-                }
-            }
-            if (!string.IsNullOrEmpty(Instance.Config.Models.GuardModel))
-            {
-                player.SetModel(Instance.Config.Models.GuardModel);
-                player.SetTag(" ");
-            }
-        }
-        RemoveSimonInterval();
-        UpdateSimonHud();
-    }
-
-    public static void RemoveDeputy()
-    {
-        var player = Utilities.GetPlayerFromSlot(deputySlot);
-
-        if (player != null && player.IsValid && player.PawnIsAlive)
-        {
-            if (!string.IsNullOrEmpty(Instance.Config.Models.GuardModel))
-            {
-                player.SetModel(Instance.Config.Models.GuardModel);
-                player.SetTag(" ");
-            }
-        }
-
-        deputySlot = INVALID_SLOT;
-    }
-
-    public static void RemoveIfSimon(CCSPlayerController? player)
-    {
-        if (isSimon(player))
-        {
-            RemoveSimon();
-        }
-    }
-    public static void RemoveIfDeputy(CCSPlayerController? player)
-    {
-        if (isDeputy(player))
-        {
-            RemoveDeputy();
-        }
-    }
-
-    public static CCSPlayerController? GetSimon()
-    {
-        if (simonSlot == INVALID_SLOT)
-        {
-            Instance.Logger.LogDebug("[Simon] No valid Simon slot.");
-            return null;
-        }
-
-        var simonPlayer = Utilities.GetPlayerFromSlot(simonSlot);
-        if (simonPlayer == null || !simonPlayer.IsValid || !simonPlayer.PawnIsAlive)
-        {
-            Instance.Logger.LogDebug($"[Simon] Simon slot {simonSlot} is invalid or dead.");
-            return null;
-        }
-
-        return simonPlayer;
-    }
-
-
-    public static void SetDeputy(int slot)
-    {
-        deputySlot = slot;
-        var player = Utilities.GetPlayerFromSlot(deputySlot);
-        if (player == null || !player.IsValid)
-        {
-            deputySlot = INVALID_SLOT;
-            return;
-        }
-
-        if (isSimon(player))
-        {
-            return;
-        }
-        if (!string.IsNullOrEmpty(Instance.Config.Models.DeputyModel))
-        {
-            player.SetModel(Instance.Config.Models.DeputyModel);
-            player.SetTag("⭐Deputy⭐");
-        }
-    }
     public static JailPlayer? JailPlayerFromPlayer(CCSPlayerController? player)
     {
         if (player == null || !player.IsValid)
@@ -443,30 +262,12 @@ public partial class Simon
 
         return jailPlayers[player.Slot];
     }
-    public static bool isSimon(CCSPlayerController? player)
-    {
-        if (player == null || !player.PawnIsAlive)
-        {
-            return false;
-        }
 
-        return player.Slot == simonSlot;
-    }
-
-    public static bool isDeputy(CCSPlayerController? player)
-    {
-        if (player == null || !player.PawnIsAlive)
-        {
-            return false;
-        }
-
-        return player.Slot == deputySlot;
-    }
     public static void UpdateSimonHud()
     {
         try
         {
-            var currentSimon = GetSimon();
+            var currentSimon = jailApi.GetSimon();
             string simonName = currentSimon != null ? currentSimon.PlayerName : Instance.Localizer["hud.current.simon.none"];
 
             foreach (var player in Utilities.GetPlayers())

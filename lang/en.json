@@ -32,6 +32,9 @@
     "special_day.next": "The next round will be {yellow}{0}{orange}.",
     "special_day.next.center": "The next round will be {0}",
 
+    "t.can.talk": "Prisoners can speak quietly now.",
+    "t.muted.new.simon": "A new {purple}Simon{orange} was choosed. All prisoners are muted for {0} seconds!",
+
     "sd.one_in_the_chamber": "One In The Chamber Day",
     "sd.no_scope": "No Scope Day",
     "sd.hide_n_seek": "Hide And Seek Day",
@@ -82,7 +85,7 @@
     "need.to.be.t": "You must be on the {yellow}prisoners{orange} team to use this command!",
     "deputy.exists": "There is already a {darkblue}Deputy{orange}!",
     "not.simon": "You are not {darkblue}Simon{orange}.",
-    "t.muted": "All {yellow}prisoners{orange} have been muted until the end of the round.",
+    "t.muted": "All {yellow}prisoners{orange} is muted for {0} seconds.",
     "t.unmuted": "{yellow}The prisoners{orange} have been temporarily unmuted.",
     "simon.disconnected": "{darkblue}Simon{orange} has left the game! Type {bluegrey}!s{orange} to become the new {purple}Simon{orange}.",
     "player.not.found": "No player with that name was found.",
@@ -129,11 +132,19 @@
     "lr<selectplayer>": "Choose player",
     "start.lr.question": "Start a Duel?",
 
+    "submenu<cells>": "Cells Management",
+    "submenu<box>": "Box Management",
+
     "option<yes>": "Yes",
     "option<no>": "No",
     "option<accept>": "Accept",
     "option<refuse>": "Refuse",
     "option<freeday>": "Offer Freeday",
+    "option<cells>": "Cells Management",
+    "option<opencells>": "Open Cells",
+    "option<closecells>": "Close Cells",
+    "option<box>": "Box Management",
+    "option<togglebox>": "Box Enabled",
     "no.freeday.players": "No Freeday Players",
     "no.prisoniers.players": "No Prisoners ",
     "option<removefreeday>": "Withdraw Freeday",
@@ -190,7 +201,7 @@
     "type<deagle>": "Deagle",
 
     "simon.tag": "⭐Simon⭐",
-    "deputy.tag": "⭐Simon⭐",
+    "deputy.tag": "⭐Deputy",
     "hud.current.simon": "Current simon: {0}",
     "hud.current.simon.none": "None"
 }

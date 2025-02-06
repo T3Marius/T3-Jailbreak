@@ -59,24 +59,26 @@ namespace T3Jailbreak
         }
 
         const string CreateTableQuery = @"
-        CREATE TABLE IF NOT EXISTS JB_LastRequest (
-          Id INT AUTO_INCREMENT PRIMARY KEY,
-          PlayerName VARCHAR(256) NOT NULL UNIQUE,
-          Wins INT NOT NULL DEFAULT 0,
-          Losses INT NOT NULL DEFAULT 0,
-          DateAdded DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            CREATE TABLE IF NOT EXISTS JB_LastRequest (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                PlayerName VARCHAR(256) NOT NULL UNIQUE,
+                Wins INT NOT NULL DEFAULT 0,
+                Losses INT NOT NULL DEFAULT 0,
+                DateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );";
+
         const string CreateCTBanTableQuery = @"
-        CREATE TABLE IF NOT EXISTS JB_CTBans (
-          Id INT AUTO_INCREMENT PRIMARY KEY,
-          SteamID VARCHAR(32) NOT NULL UNIQUE,
-          PlayerName VARCHAR(256) NOT NULL,
-          AdminName VARCHAR(256) NOT NULL,
-          Reason TEXT NOT NULL,
-          Duration INT NOT NULL, -- Duration in minutes
-          BanTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          ExpirationTime DATETIME NOT NULL
+            CREATE TABLE IF NOT EXISTS JB_CTBans (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                SteamID VARCHAR(32) NOT NULL UNIQUE,
+                PlayerName VARCHAR(256) NOT NULL,
+                AdminName VARCHAR(256) NOT NULL,
+                Reason TEXT NOT NULL,
+                Duration INT NOT NULL, -- Duration in minutes
+                BanTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                ExpirationTime DATETIME NOT NULL
         );";
+
 
         public static async Task UpdatePlayerStatsAsync(string playerName, bool isWinner)
         {

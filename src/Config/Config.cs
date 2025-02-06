@@ -175,9 +175,13 @@ public class Sounds_Config
     public string SetSimonSound { get; set; } = "";
     public string SimonDeathSound { get; set; } = "";
     public string SimonGaveUpSound { get; set; } = "";
+    public string BoxSound { get; set; } = "";
 }
 public class Prisoniers_Config
 {
+    public float MuteXSecondsOnRoundStart { get; set; } = 30.0f;
+    public float MuteXSecondsOnSimonSet { get; set; } = 30.0f;
+    public List<string> SkipFlagForMute { get; set; } = ["@css/generic"];
     public List<string> SkipQueuePermissions { get; set; } = ["@css/vip"];
     public int HealCommandCountPerRound { get; set; } = 2;
 }

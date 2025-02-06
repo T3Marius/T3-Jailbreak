@@ -40,6 +40,9 @@ public static class SpecialDays
     public static bool hidenseekCountDownActive;
     public static bool allowSpecialDay = true;
     private static int roundsSinceLastSpecialDay = 0;
+
+    private static JailAPI JailApi { get; set; } = new JailAPI();
+
     private static int roundsRequiredForSpecialDay => Instance.Config.SpecialDays.SDRoundsCountdown;
     private static readonly Dictionary<CCSPlayerController, int> PlayerWeaponProgress = new();
     private static readonly Dictionary<CCSPlayerController, bool> ArmsRaceKnifeUsers = new();
@@ -467,7 +470,7 @@ public static class SpecialDays
 
         bool hasPermission = Instance.Config.SpecialDays.AdminPermissions.Any(permission =>
             AdminManager.PlayerHasPermissions(player, permission));
-        bool isSimon = Simon.isSimon(player);
+        bool isSimon = jailApi.IsSimon(player);
 
         if (!hasPermission && !isSimon)
         {

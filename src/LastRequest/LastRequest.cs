@@ -9,6 +9,7 @@ using static T3Jailbreak.LRHelper;
 using System.Drawing;
 using CounterStrikeSharp.API.Modules.Entities;
 using Microsoft.Extensions.Logging;
+using JailAPI;
 
 namespace T3Jailbreak
 {
@@ -28,6 +29,8 @@ namespace T3Jailbreak
         private static bool isCountdownActive = false;
         private static DateTime lastUpdateTime;
         private static float remainingCountdown = 0f;
+
+        private static JailAPI jailApi { get; set; } = new JailAPI();
 
         public static bool isLrActive = false;
         public static bool isLrEnded = false;
@@ -527,10 +530,10 @@ namespace T3Jailbreak
 
             player.VoiceFlags = VoiceFlags.Normal;
 
-            var simon = Simon.GetSimon();
+            var simon = jailApi.GetSimon();
             if (simon != null)
             {
-                Simon.RemoveSimon();
+                jailApi.RemoveSimon();
             }
 
             var manager = Instance.GetMenuManager();

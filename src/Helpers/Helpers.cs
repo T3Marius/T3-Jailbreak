@@ -557,6 +557,7 @@ namespace T3Jailbreak
             ForceEntInput("func_movelinear", "Close");
             ForceEntInput("func_door_rotating", "Close");
             ForceEntInput("prop_door_rotating", "Close");
+            Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["cells.closed"]);
         }
 
         public static void ForceOpen()
@@ -566,6 +567,7 @@ namespace T3Jailbreak
             ForceEntInput("func_door_rotating", "Open");
             ForceEntInput("prop_door_rotating", "Open");
             ForceEntInput("func_breakable", "Break");
+            Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["cells.opened"]);
         }
         public static CCSPlayerController? FindPlayer(string identifier, CCSPlayerController? caller)
         {
