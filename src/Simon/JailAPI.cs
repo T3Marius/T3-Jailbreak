@@ -44,7 +44,10 @@ public class JailAPI : IJailAPI
         }
         player.GiveWeapon("taser");
         player.SetTag(Instance.Localizer["simon.tag"]);
-        player.SetColor(Color.Blue);
+        if (!string.IsNullOrEmpty(Instance.Config.Simon.SimonColor))
+        {
+            player.SetColor(Color.FromName(Instance.Config.Simon.SimonColor));
+        }
         UpdateSimonHud();
 
         if (Instance.Config.Prisoniers.MuteXSecondsOnSimonSet > 0)

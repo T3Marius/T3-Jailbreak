@@ -559,7 +559,44 @@ namespace T3Jailbreak
             ForceEntInput("prop_door_rotating", "Close");
             Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["cells.closed"]);
         }
+        public static Color GetColorFromString(string colorString)
+        {
+            if (string.IsNullOrWhiteSpace(colorString))
+                throw new ArgumentException("Color string cannot be null or empty.", nameof(colorString));
 
+            if (colorString.StartsWith("#"))
+            {
+                try
+                {
+                    return ColorTranslator.FromHtml(colorString);
+                }
+                catch
+                {
+                    throw new FormatException($"The color string '{colorString}' is not a valid hex color.");
+                }
+            }
+            else
+            {
+                Color color = Color.FromName(colorString);
+                if (!color.IsKnownColor)
+                {
+                    throw new FormatException($"The color name '{colorString}' is not a recognized color.");
+                }
+                return color;
+            }
+        }
+
+        public static string GetStringFromColor(Color color)
+        {
+            if (color.IsKnownColor)
+            {
+                return color.Name.ToLower();
+            }
+            else
+            {
+                return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+            }
+        }
         public static void ForceOpen()
         {
             ForceEntInput("func_door", "Open");
@@ -613,18 +650,24 @@ namespace T3Jailbreak
         }
         public static void EnableBunnyHoop()
         {
-            Server.ExecuteCommand("sv_autobunnyhopping 1");
-            Server.ExecuteCommand("sv_enablebunnyhopping true");
-            if (!Instance.Config.BunnyHoop.ShowChatMessages) return;
-            Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["bunnyhoop_enabled"]);
+            if (Instance.Config.BunnyHoop.EnableBunnyhoop)
+            {
+                Server.ExecuteCommand("sv_autobunnyhopping 1");
+                Server.ExecuteCommand("sv_enablebunnyhopping true");
+                if (!Instance.Config.BunnyHoop.ShowChatMessages) return;
+                Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["bunnyhoop_enabled"]);
+            }
         }
 
         public static void DisableBunnyHoop()
         {
-            Server.ExecuteCommand("sv_autobunnyhopping 0");
-            Server.ExecuteCommand("sv_enablebunnyhopping false");
-            if (!Instance.Config.BunnyHoop.ShowChatMessages) return;
-            Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["bunnyhoop_disabled", Instance.Config.BunnyHoop.BunnyHoopTimer]);
+            if (Instance.Config.BunnyHoop.EnableBunnyhoop)
+            {
+                Server.ExecuteCommand("sv_autobunnyhopping 0");
+                Server.ExecuteCommand("sv_enablebunnyhopping false");
+                if (!Instance.Config.BunnyHoop.ShowChatMessages) return;
+                Server.PrintToChatAll(Instance.Localizer["jb.prefix"] + Instance.Localizer["bunnyhoop_disabled", Instance.Config.BunnyHoop.BunnyHoopTimer]);
+            }
         }
     }
 }

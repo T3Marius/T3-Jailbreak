@@ -26,7 +26,7 @@ public class T3Jailbreak : BasePlugin, IPluginConfig<PluginConfig>
     // NOTA: ADAUGAT EVENT CHECK PT LR 
     public override string ModuleName => "[T3] Jailbreak";
     public override string ModuleAuthor => "T3Marius";
-    public override string ModuleVersion => "1.1";
+    public override string ModuleVersion => "1.2";
     public static T3Jailbreak Instance { get; set; } = new T3Jailbreak();
     public PluginConfig Config { get; set; } = new PluginConfig();
 

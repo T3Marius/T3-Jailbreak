@@ -113,10 +113,12 @@ public class AdminCommands_Permissions
 public class Simon_Config
 {
     public float SetSimonIfNotAny { get; set; } = 10.0f;
+    public string SimonColor { get; set; } = "blue";
 }
 
 public class BunnyHoop_Config
 {
+    public bool EnableBunnyhoop { get; set; } = true;
     public int BunnyHoopTimer { get; set; } = 30;
     public bool PrintToCenterHtml { get; set; } = true;
     public bool ShowChatMessages { get; set; } = true;
